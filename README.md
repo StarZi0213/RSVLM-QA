@@ -14,7 +14,7 @@ Visual Question Answering (VQA) in remote sensing (RS) is pivotal for interpreti
 * **Diverse Data Sources:** Integrates well-known RS datasets (WHU, LoveDA, INRIA, iSAID).
 * **Innovative Dual-Track Generation:**
     * **Track 1 (LLM-driven):** GPT-4.1 generates detailed image captions, spatial relations, semantic tags, and complex caption-based VQA pairs.
-    * **Track 2 (Automated Counting):** Specialized process extracts object counts from segmentation data, with GPT-4.1 formulating natural language answers for counting QA pairs.
+    * **Track 2 (Automated Counting):** Specialized process extracts object counts from segmentation data, with natural language answers for counting QA pairs.
 * **Extensive Annotations:** Superior depth and breadth compared to existing RS VQA benchmarks.
 * **Challenging Benchmarks:** Designed to effectively evaluate and push the boundaries of VLMs in the RS domain.
 * **Open Source:** Dataset, generation code, and model benchmarking scripts are publicly available.
