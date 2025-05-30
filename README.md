@@ -26,6 +26,24 @@ Visual Question Answering (VQA) in remote sensing (RS) is pivotal for interpreti
 * **Full Dataset (Images):** [Download from Google Drive](https://drive.google.com/file/d/1BUAGaZuMFNwNqHxU-NJ-Hi51Ir-yZFwE/view?usp=sharing)
 * **Annotation Files (JSONL):** [Download from Google Drive](https://drive.google.com/file/d/1zif3Y95Lfb_0zBy9AX_yTFu1kAzW13tA/view?usp=sharing)
 
+  
+### Core Prompts Used in Data Generation and Evaluation
+
+The generation of detailed annotations (tags, relations, VQA pairs, captions) and the subsequent evaluation of model performance heavily rely on carefully engineered prompts provided to Large Language Models (specifically GPT-4.1).
+
+For a comprehensive list and detailed explanations of all prompts used in our pipeline, please refer to the dedicated `Prompts.md` file:
+
+[![View Detailed Prompts - Prompts.md](https://img.shields.io/badge/View%20Detailed%20Prompts-Prompts.md-blue)](Prompts.md)
+
+The `Prompts.md` file includes the specific templates for:
+* Tag Extraction
+* Spatial Relation Extraction
+* Visual Question Answering (VQA) Pair Generation
+* Image Caption, Feature, and Summary Generation (for GPT-4 Vision)
+* Evaluation of Image Captions
+* Evaluation of VQA Tasks (Correct/Wrong judgment)
+
+  
 ## Dataset Generation Pipeline
 
 The RSVLM-QA dataset was created using a sophisticated pipeline involving both automated segmentation data processing and advanced Large Language Model capabilities. The core scripts for this pipeline are provided in this repository:
