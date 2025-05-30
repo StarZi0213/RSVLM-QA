@@ -16,9 +16,9 @@ from pathlib import Path
 from collections import Counter, defaultdict
 
 # API key from environment variable or default to empty string
-DEFAULT_API_KEY = ''
+DEFAULT_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 
-# API Rate limits for gpt-4.1
+# API Rate limits for GPT-4.1-mini
 MAX_REQUESTS_PER_MINUTE = 500  # 500 requests per minute
 MAX_TOKENS_PER_MINUTE = 200000  # 200k tokens per minute
 
@@ -32,7 +32,7 @@ current_processed_ids = set()  # Global set of processed IDs for signal handler
 
 def signal_handler(sig, frame):
     """Handle interrupt signals (CTRL+C) by saving checkpoint before exiting"""
-    print("\n程序接收到中断信号，正在保存检查点...")
+    print("\nReceived interrupt signal, saving checkpoint...")
     # Use a copy of the current processed IDs to avoid race conditions
     with checkpoint_lock:
         processed_ids_to_save = current_processed_ids.copy()
@@ -49,7 +49,7 @@ def signal_handler(sig, frame):
     
     # Default checkpoint file if not specified
     if not checkpoint_file:
-        checkpoint_file = "./count_vqa_pairs_checkpoint.json"
+        checkpoint_file = "./count_vqa_pairs_gpt4_checkpoint.json"
     
     # Save checkpoint
     with open(checkpoint_file, 'w') as f:
@@ -59,8 +59,8 @@ def signal_handler(sig, frame):
             "interrupted": True
         }, f)
     
-    print(f"已保存 {len(processed_ids_to_save)} 条记录的进度到 {checkpoint_file}")
-    print("您可以使用相同的命令重新启动程序，它将从中断点继续。")
+    print(f"Saved progress with {len(processed_ids_to_save)} records to {checkpoint_file}")
+    print("You can restart the program with the same command and it will continue from this point.")
     sys.exit(0)
 
 # Register signal handler for SIGINT (CTRL+C)
@@ -150,104 +150,62 @@ class StatsCollector:
 # Global stats collector
 stats = StatsCollector()
 
-def load_merged_dataset(json_file, mode="missing_count_vqa"):
+def load_jsonl_dataset(jsonl_file, mode="basic"):
     """
-    Load data from the merged_dataset.json file
+    Load data from the JSONL file
     
     mode options:
-    - "missing_count_vqa": only load records without 'count_vqa_pairs' field
-    - "all": load all records
+    - "basic": load all records
+    - "missing_gpt4_refinements": only load records without GPT-4.1 refinements
     """
-    print(f"正在加载数据集: {json_file}")
+    print(f"Loading dataset: {jsonl_file}")
     
     try:
-        with open(json_file, 'r') as f:
-            data = json.load(f)
+        records = []
+        total_count = 0
+        missing_refinements = 0
         
-        # Convert to list of records if it's a dictionary
-        if isinstance(data, dict):
-            records = []
-            for image_id, image_data in data.items():
-                # Add image_id to the record
-                record = image_data.copy()
-                record["id"] = image_id
-                records.append(record)
-        else:
-            records = data
-            
-        total_count = len(records)
-        missing_count_vqa = 0
-        valid_records = []
+        with open(jsonl_file, 'r') as f:
+            for line in f:
+                if line.strip():
+                    try:
+                        record = json.loads(line)
+                        total_count += 1
+                        
+                        # Add an ID if not present
+                        if "id" not in record:
+                            if "image_path" in record:
+                                record["id"] = Path(record["image_path"]).stem
+                            else:
+                                record["id"] = f"record_{total_count}"
+                        
+                        # Check if count_vqa_pairs exist
+                        has_count_vqa = "count_vqa_pairs" in record and isinstance(record["count_vqa_pairs"], list)
+                        
+                        # Check if gpt4_refined_vqa_pairs exist
+                        has_gpt4_refinements = "gpt4_refined_vqa_pairs" in record and isinstance(record["gpt4_refined_vqa_pairs"], list)
+                        
+                        if mode == "basic" and has_count_vqa:
+                            records.append(record)
+                        elif mode == "missing_gpt4_refinements" and has_count_vqa and not has_gpt4_refinements:
+                            missing_refinements += 1
+                            records.append(record)
+                            
+                    except json.JSONDecodeError:
+                        print(f"Error decoding JSON line: {line[:100]}...")
+                        continue
         
-        # Process records based on mode
-        for record in tqdm(records, desc="加载数据集"):
-            # Add an ID if not present
-            if "id" not in record:
-                if "image_path" in record:
-                    record["id"] = Path(record["image_path"]).stem
-                else:
-                    record["id"] = str(len(valid_records))
-            
-            # Check if record has the required 'Seg' field for object counting
-            if "Seg" not in record or not record["Seg"]:
-                continue
-                
-            # Handle based on mode
-            if mode == "missing_count_vqa":
-                has_count_vqa = "count_vqa_pairs" in record and isinstance(record["count_vqa_pairs"], list)
-                
-                # Check if count_vqa_pairs are missing
-                if not has_count_vqa:
-                    missing_count_vqa += 1
-                    valid_records.append(record)
-            elif mode == "all":
-                valid_records.append(record)
-        
-        print(f"数据集加载摘要:")
-        print(f"- 总记录数: {total_count}")
-        if mode == "missing_count_vqa":
-            print(f"- 缺少物体计数VQA问题对的记录: {missing_count_vqa}")
-        print(f"- 要处理的有效记录: {len(valid_records)}")
-        return valid_records
+        print(f"Dataset loading summary:")
+        print(f"- Total records: {total_count}")
+        if mode == "missing_gpt4_refinements":
+            print(f"- Records missing GPT-4.1 refinements: {missing_refinements}")
+        print(f"- Valid records to process: {len(records)}")
+        return records
         
     except Exception as e:
-        print(f"加载数据集时出错: {e}")
+        print(f"Error loading dataset: {e}")
         traceback.print_exc()
         return []
-
-def extract_object_counts(record):
-    """
-    Extract object counts from the Seg field of a record
-    
-    Returns:
-        dict: Dictionary mapping object types to their counts
-    """
-    object_counts = Counter()
-    
-    try:
-        seg_data = record.get("Seg", {})
-        
-        # Count objects by category
-        for category, instances in seg_data.items():
-            # Skip if category is empty or not a string
-            if not category or not isinstance(category, str):
-                continue
-                
-            # Skip if instances is not a list
-            if not isinstance(instances, list):
-                continue
-                
-            # Count valid instances
-            valid_instances = [inst for inst in instances if isinstance(inst, (dict, list))]
-            if valid_instances:
-                object_counts[category] = len(valid_instances)
-        
-        return object_counts
-        
-    except Exception as e:
-        print(f"提取物体计数时出错: {e}")
-        traceback.print_exc()
-        return Counter()
 
 def save_checkpoint(checkpoint_file, processed_ids):
     """Save a checkpoint with processed record IDs"""
@@ -261,7 +219,7 @@ def save_checkpoint(checkpoint_file, processed_ids):
                 "timestamp": time.time(),
                 "interrupted": False
             }, f)
-    print(f"检查点已保存: {len(processed_ids)} 条已处理记录")
+    print(f"Checkpoint saved: {len(processed_ids)} processed records")
 
 def load_checkpoint(checkpoint_file):
     """Load a checkpoint with processed record IDs"""
@@ -278,9 +236,9 @@ def load_checkpoint(checkpoint_file):
                 current_processed_ids.update(processed_ids)
             
             if interrupted:
-                print(f"检测到上次程序被中断。从中断点恢复...")
+                print(f"Detected previous interruption. Resuming from checkpoint...")
             
-            print(f"已加载检查点: {len(processed_ids)} 条已处理记录 (距今: {age_hours:.1f} 小时)")
+            print(f"Loaded checkpoint: {len(processed_ids)} processed records (Age: {age_hours:.1f} hours)")
             return processed_ids
     return set()
 
@@ -296,117 +254,209 @@ def load_existing_data(jsonl_file):
                         data.append(record)
                     except json.JSONDecodeError:
                         continue
-    return data 
+    return data
 
-def generate_count_vqa_pairs(record):
+@backoff.on_exception(backoff.expo, 
+                     (requests.exceptions.RequestException, 
+                      requests.exceptions.Timeout, 
+                      requests.exceptions.ConnectionError),
+                     max_tries=5)
+def enhance_single_vqa_pair(vqa_pair, image_description, api_key):
     """
-    Generate counting-based VQA pairs from a record
+    Enhance a single VQA pair using GPT-4.1
     
     Args:
-        record: Dictionary containing image data with Seg field
+        vqa_pair: Dictionary containing a single question-answer pair
+        image_description: Description of the image (if available)
+        api_key: OpenAI API key
         
     Returns:
-        list: List of VQA pairs
+        dict: Enhanced VQA pair or None if enhancement failed
     """
-    vqa_pairs = []
-    
     try:
-        # Extract object counts from the record
-        object_counts = extract_object_counts(record)
+        question = vqa_pair.get("question", "")
+        answer = vqa_pair.get("answer", "")
+        question_id = vqa_pair.get("question_id", "unknown")
+        question_type = vqa_pair.get("question_type", "unknown")
         
-        # Skip if no objects to count
-        if not object_counts:
-            return []
+        # Create the prompt for GPT-4.1
+        prompt = f"""You are an expert in enhancing Visual Question Answering (VQA) pairs related to object counting in images.
+
+Below is an automatically generated counting-based VQA pair for an image. 
+This pair was generated based on object detection results without seeing the actual image.
+
+Image description: {image_description}
+
+Question: {question}
+Answer: {answer}
+
+Please enhance this VQA pair by:
+1. Improving the language quality and naturalness of both the question and answer
+2. Making the question more diverse in structure and complexity
+3. Ensuring the answer is informative, complete, and grammatically correct
+4. Keeping the same factual content but making the language more human-like
+5. Maintaining the same objects and counts as in the original pair
+
+Return the enhanced VQA pair in JSON format as follows:
+{{
+  "question_id": "{question_id}",
+  "question_type": "{question_type}",
+  "question": "enhanced question",
+  "answer": "enhanced answer",
+  "original_question": "{question}",
+  "original_answer": "{answer}"
+}}
+
+DO NOT add any explanation before or after the JSON object.
+"""
+
+        # Estimate token count for this request
+        estimated_token_count = len(prompt.split()) * 1.3 + 300  # Rough estimate
+        
+        # Wait if approaching rate limits
+        wait_time = rate_limiter.wait_if_needed(estimated_token_count)
+        if wait_time > 0:
+            print(f"Rate limit approaching, waiting for {wait_time:.2f} seconds")
+            time.sleep(wait_time)
+        
+        # Prepare the API request
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        
+        payload = {
+            "model": "gpt-4.1",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.7,
+            "max_tokens": 500,
+            "top_p": 1,
+            "frequency_penalty": 0,
+            "presence_penalty": 0
+        }
+        
+        # Make the API request
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers=headers,
+            json=payload
+        )
+        
+        # Record the request with rate limiter
+        rate_limiter.add_request(estimated_token_count)
+        
+        # Process the response
+        if response.status_code == 200:
+            result = response.json()
+            usage = result.get("usage", {})
+            total_tokens = usage.get("total_tokens", 0)
             
-        # Get image description if available
+            # Get the content from the response
+            content = result["choices"][0]["message"]["content"]
+            
+            # Extract JSON content from the response
+            try:
+                # Find JSON object in the response (might be wrapped in ```json or other formatting)
+                if "{" in content and "}" in content:
+                    json_start = content.find("{")
+                    json_end = content.rfind("}") + 1
+                    json_content = content[json_start:json_end]
+                    enhanced_pair = json.loads(json_content)
+                else:
+                    # Try parsing the entire content as JSON
+                    enhanced_pair = json.loads(content)
+                
+                # Update statistics
+                stats.add_result(True, total_tokens)
+                print(f"✅ Successfully enhanced VQA pair ({total_tokens} tokens)")
+                
+                return enhanced_pair, total_tokens
+            except json.JSONDecodeError as e:
+                print(f"❌ Error parsing JSON from GPT-4.1 response: {e}")
+                print(f"Response content: {content[:300]}...")
+                stats.add_result(False)
+                return None, 0
+        else:
+            error_message = response.text
+            print(f"❌ Request failed: {response.status_code}, Error: {error_message}")
+            
+            # Update statistics
+            stats.add_result(False)
+            
+            # Handle rate limiting
+            if response.status_code == 429:
+                retry_after = int(response.headers.get("Retry-After", 60))
+                print(f"Rate limited. Waiting for {retry_after} seconds")
+                time.sleep(retry_after)
+            
+            return None, 0
+    
+    except Exception as e:
+        print(f"❌ Error enhancing VQA pair: {e}")
+        traceback.print_exc()
+        stats.add_result(False)
+        return None, 0
+
+def enhance_vqa_pairs_with_gpt4(record, api_key):
+    """
+    Enhance VQA pairs using GPT-4.1, one pair at a time
+    
+    Args:
+        record: Dictionary containing record data with count_vqa_pairs
+        api_key: OpenAI API key
+        
+    Returns:
+        list: Enhanced VQA pairs
+    """
+    try:
+        count_vqa_pairs = record.get("count_vqa_pairs", [])
+        
+        if not count_vqa_pairs:
+            return []
+        
+        # Extract image description if available
         image_description = record.get("answer", "")
         
-        # Generate VQA pairs for each object type
-        for obj_type, count in object_counts.items():
-            # Clean up object type name for better readability
-            clean_obj_type = obj_type.replace("_", " ").strip().lower()
-            
-            # Generate a count question
-            question = f"How many {clean_obj_type}s are there in the image?"
-            answer = f"There are {count} {clean_obj_type}" + ("s" if count > 1 else "") + " in the image."
-            
-            vqa_pairs.append({
-                "question_id": f"count_{obj_type}_{len(vqa_pairs) + 1}",
-                "question_type": "count",
-                "question": question,
-                "answer": answer
-            })
-            
-            # For objects with count > 1, add a yes/no question about presence
-            if count > 0:
-                question = f"Are there any {clean_obj_type}s in the image?"
-                answer = f"Yes, there are {count} {clean_obj_type}" + ("s" if count > 1 else "") + "."
-                
-                vqa_pairs.append({
-                    "question_id": f"presence_{obj_type}_{len(vqa_pairs) + 1}",
-                    "question_type": "presence",
-                    "question": question,
-                    "answer": answer
-                })
-                
-            # For images with multiple object types, generate comparative questions
-            if len(object_counts) > 1 and list(object_counts.keys()).index(obj_type) == 0:
-                # Get a different object type for comparison
-                other_types = [t for t in object_counts.keys() if t != obj_type]
-                if other_types:
-                    other_type = other_types[0]
-                    clean_other_type = other_type.replace("_", " ").strip().lower()
-                    other_count = object_counts[other_type]
-                    
-                    # Generate comparative question
-                    question = f"Are there more {clean_obj_type}s or {clean_other_type}s in the image?"
-                    
-                    if count > other_count:
-                        answer = f"There are more {clean_obj_type}s ({count}) than {clean_other_type}s ({other_count})."
-                    elif count < other_count:
-                        answer = f"There are more {clean_other_type}s ({other_count}) than {clean_obj_type}s ({count})."
-                    else:
-                        answer = f"There are equal numbers of {clean_obj_type}s and {clean_other_type}s ({count} each)."
-                    
-                    vqa_pairs.append({
-                        "question_id": f"compare_{obj_type}_{other_type}_{len(vqa_pairs) + 1}",
-                        "question_type": "comparison",
-                        "question": question,
-                        "answer": answer
-                    })
+        # Process each VQA pair individually
+        enhanced_pairs = []
+        total_tokens_used = 0
         
-        # Add overall count question if there are multiple object types
-        if len(object_counts) > 1:
-            total_count = sum(object_counts.values())
-            obj_list = ", ".join([f"{count} {t.replace('_', ' ').lower()}" + ("s" if count > 1 else "") 
-                                for t, count in object_counts.items()])
+        for i, pair in enumerate(count_vqa_pairs):
+            print(f"Processing VQA pair {i+1}/{len(count_vqa_pairs)}...")
             
-            question = "What is the total number of objects in the image?"
-            answer = f"There are a total of {total_count} objects in the image, consisting of {obj_list}."
+            # Enhance the individual VQA pair
+            enhanced_pair, tokens_used = enhance_single_vqa_pair(pair, image_description, api_key)
+            total_tokens_used += tokens_used
             
-            vqa_pairs.append({
-                "question_id": f"total_count_{len(vqa_pairs) + 1}",
-                "question_type": "total_count",
-                "question": question,
-                "answer": answer
-            })
-            
-        return vqa_pairs
+            if enhanced_pair:
+                enhanced_pairs.append(enhanced_pair)
+                print(f"  Q: {enhanced_pair.get('question', '')[:50]}...")
+            else:
+                # If enhancement failed, include the original pair with a flag
+                fallback_pair = pair.copy()
+                fallback_pair["original_question"] = pair.get("question", "")
+                fallback_pair["original_answer"] = pair.get("answer", "")
+                fallback_pair["enhancement_failed"] = True
+                enhanced_pairs.append(fallback_pair)
+                print(f"  Failed to enhance pair {i+1}")
+        
+        print(f"Enhanced {len(enhanced_pairs)}/{len(count_vqa_pairs)} VQA pairs, using {total_tokens_used} tokens total")
+        return enhanced_pairs
         
     except Exception as e:
-        print(f"生成计数VQA对时出错: {e}")
+        print(f"❌ Error in enhance_vqa_pairs_with_gpt4: {e}")
         traceback.print_exc()
         return []
 
 def process_single_record(record, output_file, result_queue, api_key=DEFAULT_API_KEY):
     """
-    Process a single record to generate counting-based VQA pairs
+    Process a single record to enhance VQA pairs using GPT-4.1
     
     Args:
-        record: Dictionary containing image data
+        record: Dictionary containing record data
         output_file: Path to the output JSONL file
         result_queue: Queue for sending results to writer thread
-        api_key: API key for OpenAI (not used in this function but kept for compatibility)
+        api_key: API key for OpenAI
     """
     record_id = record.get("id", "unknown")
     
@@ -414,43 +464,30 @@ def process_single_record(record, output_file, result_queue, api_key=DEFAULT_API
         # Check if this record is already being processed
         with processed_lock:
             if record_id in currently_processing:
-                print(f"跳过重复处理: {record_id}")
+                print(f"Skipping duplicate processing: {record_id}")
                 return
             currently_processing.add(record_id)
         
-        print(f"正在处理记录: {record_id}")
+        print(f"Processing record: {record_id}")
         
-        # Generate count-based VQA pairs
-        count_vqa_pairs = generate_count_vqa_pairs(record)
+        # Enhance VQA pairs using GPT-4.1
+        enhanced_vqa_pairs = enhance_vqa_pairs_with_gpt4(record, api_key)
         
-        if count_vqa_pairs:
+        if enhanced_vqa_pairs:
             # Create result record for writer thread
-            result = {
-                "id": record_id,
-                "image_path": record.get("image_path", ""),
-                "count_vqa_pairs": count_vqa_pairs
-            }
-            
-            # Add original record data 
-            for key in ["answer", "tags", "relations"]:
-                if key in record:
-                    result[key] = record[key]
+            result = record.copy()
+            result["gpt4_refined_vqa_pairs"] = enhanced_vqa_pairs
             
             # Put result in the queue for writer thread
             result_queue.put(result)
             
-            # Update statistics
-            stats.add_result(True)
-            print(f"✅ 成功为记录 {record_id} 生成 {len(count_vqa_pairs)} 个计数VQA对")
+            print(f"✅ Successfully enhanced {len(enhanced_vqa_pairs)} VQA pairs for record {record_id}")
         else:
             # Update statistics for failure
-            stats.add_result(False)
-            print(f"❌ 无法为记录 {record_id} 生成计数VQA对")
+            print(f"❌ Failed to enhance VQA pairs for record {record_id}")
         
     except Exception as e:
-        # Update statistics for failure
-        stats.add_result(False)
-        print(f"❌ 处理记录 {record_id} 时出错: {e}")
+        print(f"❌ Error processing record {record_id}: {e}")
         traceback.print_exc()
     finally:
         # Remove from currently processing set
@@ -468,12 +505,12 @@ def writer_thread(output_file, result_queue, stop_event, existing_data, checkpoi
         existing_data: List of existing records from output file
         checkpoint_file: Path to checkpoint file for saving progress
     """
-    print(f"写入线程已启动，将结果写入 {output_file}")
+    print(f"Writer thread started, writing results to {output_file}")
     
     # Create lookup for existing records
     existing_records = {record.get("id"): record for record in existing_data if "id" in record}
     processed_ids = set(existing_records.keys())
-    print(f"从现有输出文件中读取了 {len(existing_records)} 条记录")
+    print(f"Loaded {len(existing_records)} existing records from output file")
     
     # Load processed IDs from checkpoint if available
     if checkpoint_file and os.path.exists(checkpoint_file):
@@ -493,9 +530,22 @@ def writer_thread(output_file, result_queue, stop_event, existing_data, checkpoi
                 # Get record ID
                 record_id = result.get("id", "unknown")
                 
-                # Write result to file
-                f.write(json.dumps(result, ensure_ascii=False) + "\n")
-                f.flush()  # Flush to disk immediately
+                # Determine if this is an update to an existing record
+                is_update = record_id in existing_records
+                
+                if is_update:
+                    # Update in-memory copy of existing records
+                    existing_records[record_id] = result
+                    
+                    # We'll rewrite the entire file at the end
+                    pass
+                else:
+                    # Write new result to file
+                    f.write(json.dumps(result, ensure_ascii=False) + "\n")
+                    f.flush()  # Flush to disk immediately
+                    
+                    # Add to existing records
+                    existing_records[record_id] = result
                 
                 # Update processed IDs
                 processed_ids.add(record_id)
@@ -513,69 +563,86 @@ def writer_thread(output_file, result_queue, stop_event, existing_data, checkpoi
                 # Print progress stats
                 if checkpoint_counter % 5 == 0:
                     current_stats = stats.get_stats()
-                    print(f"进度更新: 已处理={current_stats['processed']}, "
-                          f"成功={current_stats['success']}, "
-                          f"失败={current_stats['failure']}, "
-                          f"请求/分钟={current_stats['requests_per_minute']:.1f}")
+                    print(f"Progress update: Processed={current_stats['processed']}, "
+                          f"Success={current_stats['success']}, "
+                          f"Failure={current_stats['failure']}, "
+                          f"Requests/min={current_stats['requests_per_minute']:.1f}")
                 
             except queue.Empty:
                 # Queue is empty, no results to process
                 continue
             except Exception as e:
-                print(f"写入线程错误: {e}")
+                print(f"Writer thread error: {e}")
                 traceback.print_exc()
+        
+        # If there were any updates to existing records, rewrite the entire file
+        if any(record_id in existing_records for record_id in processed_ids):
+            print("Updates to existing records detected. Rewriting entire output file...")
+            temp_file = f"{output_file}.temp"
+            with open(temp_file, 'w') as temp_f:
+                for record in existing_records.values():
+                    temp_f.write(json.dumps(record, ensure_ascii=False) + "\n")
+            
+            # Replace original file with the temp file
+            os.replace(temp_file, output_file)
+            print(f"Output file rewritten with {len(existing_records)} records")
         
         # Save final checkpoint
         if checkpoint_file:
             save_checkpoint(checkpoint_file, processed_ids)
     
-    print("写入线程已完成")
+    print("Writer thread completed")
 
-def process_dataset(input_file, output_file, num_threads=20, max_records=None, mode="missing_count_vqa", api_key=DEFAULT_API_KEY, checkpoint_file=None):
+def process_dataset(input_file, output_file, num_threads=10, max_records=None, mode="missing_gpt4_refinements", api_key=DEFAULT_API_KEY, checkpoint_file=None):
     """
-    Process the dataset to generate counting-based VQA pairs
+    Process the dataset to enhance VQA pairs using GPT-4.1
     
     Args:
-        input_file: Path to the input JSON file (merged_dataset.json)
+        input_file: Path to the input JSONL file
         output_file: Path to the output JSONL file
         num_threads: Number of worker threads to use
         max_records: Maximum number of records to process (for testing)
-        mode: Processing mode ("missing_count_vqa" or "all")
+        mode: Processing mode ("missing_gpt4_refinements" or "basic")
         api_key: OpenAI API key
         checkpoint_file: Path to checkpoint file for saving/loading progress
     """
-    print(f"开始处理数据集...")
-    print(f"输入文件: {input_file}")
-    print(f"输出文件: {output_file}")
-    print(f"模式: {mode}")
-    print(f"线程数: {num_threads}")
-    print(f"检查点文件: {checkpoint_file}")
+    print(f"Starting dataset processing...")
+    print(f"Input file: {input_file}")
+    print(f"Output file: {output_file}")
+    print(f"Mode: {mode}")
+    print(f"Thread count: {num_threads}")
+    print(f"Checkpoint file: {checkpoint_file}")
     
     # Load processed IDs from checkpoint if available
     processed_ids = set()
     if checkpoint_file and os.path.exists(checkpoint_file):
         processed_ids = load_checkpoint(checkpoint_file)
-    print(f"已从检查点加载 {len(processed_ids)} 条已处理记录的ID")
+    print(f"Loaded {len(processed_ids)} processed record IDs from checkpoint")
     
     # Load existing data from output file if it exists
     existing_data = load_existing_data(output_file)
-    print(f"已从输出文件加载 {len(existing_data)} 条记录")
+    print(f"Loaded {len(existing_data)} records from output file")
+    
+    # Add IDs from existing data to processed IDs
+    for record in existing_data:
+        if "id" in record:
+            processed_ids.add(record["id"])
     
     # Load dataset
-    records = load_merged_dataset(input_file, mode)
+    records = load_jsonl_dataset(input_file, mode)
     
     # Filter out already processed records
     unprocessed_records = [r for r in records if r.get("id") not in processed_ids]
-    print(f"待处理记录数: {len(unprocessed_records)} / {len(records)}")
+    print(f"Records to process: {len(unprocessed_records)} / {len(records)}")
     
     # Limit records for testing if specified
     if max_records and max_records > 0:
         unprocessed_records = unprocessed_records[:max_records]
-        print(f"限制为处理前 {max_records} 条记录")
+        print(f"Limited to processing first {max_records} records")
     
     # Skip processing if no records to process
     if not unprocessed_records:
-        print("没有要处理的记录，退出程序。")
+        print("No records to process, exiting.")
         return
     
     # Create queue for results
@@ -604,14 +671,14 @@ def process_dataset(input_file, output_file, num_threads=20, max_records=None, m
                 futures.append(future)
             
             # Use tqdm to show progress
-            for _ in tqdm(concurrent.futures.as_completed(futures), total=len(futures), 
-                         desc="处理记录", unit="record"):
+            for _ in tqdm(ThreadPoolExecutor().map(lambda f: f.result(), futures), 
+                         total=len(futures), desc="Processing records", unit="record"):
                 pass
     
     except KeyboardInterrupt:
-        print("\n收到中断，正在停止...")
+        print("\nInterrupted, stopping...")
     except Exception as e:
-        print(f"处理数据集时出错: {e}")
+        print(f"Error processing dataset: {e}")
         traceback.print_exc()
     finally:
         # Signal writer thread to stop
@@ -622,27 +689,33 @@ def process_dataset(input_file, output_file, num_threads=20, max_records=None, m
     
     # Print final statistics
     final_stats = stats.get_stats()
-    print("\n处理完成! 最终统计:")
-    print(f"已处理记录数: {final_stats['processed']}")
-    print(f"成功记录数: {final_stats['success']}")
-    print(f"失败记录数: {final_stats['failure']}")
-    print(f"总运行时间: {final_stats['elapsed_seconds'] / 60:.1f} 分钟")
-    print(f"平均处理速率: {final_stats['requests_per_minute']:.1f} 记录/分钟")
+    print("\nProcessing complete! Final statistics:")
+    print(f"Records processed: {final_stats['processed']}")
+    print(f"Successful enhancements: {final_stats['success']}")
+    print(f"Failed enhancements: {final_stats['failure']}")
+    print(f"Total runtime: {final_stats['elapsed_seconds'] / 60:.1f} minutes")
+    print(f"Average processing rate: {final_stats['requests_per_minute']:.1f} records/minute")
+    print(f"Total tokens used: {final_stats['total_tokens']}")
 
 def main():
     """Main function to parse arguments and start processing"""
-    parser = argparse.ArgumentParser(description="从现有数据集生成计数型VQA问题对")
+    parser = argparse.ArgumentParser(description="Enhance count-based VQA pairs using GPT-4.1")
     
-    parser.add_argument("-i", "--input", required=True, help="输入数据集文件路径 (merged_dataset.json)")
-    parser.add_argument("-o", "--output", default="count_vqa_dataset.jsonl", help="输出JSONL文件路径")
-    parser.add_argument("-t", "--threads", type=int, default=10, help="处理线程数量")
-    parser.add_argument("-m", "--mode", choices=["missing_count_vqa", "all"], default="missing_count_vqa", 
-                        help="处理模式: 'missing_count_vqa' 仅处理缺少计数VQA对的记录, 'all' 处理所有记录")
-    parser.add_argument("-k", "--api-key", default=DEFAULT_API_KEY, help="OpenAI API密钥")
-    parser.add_argument("-c", "--checkpoint", default="./count_vqa_pairs_checkpoint.json", help="检查点文件路径")
-    parser.add_argument("-n", "--max-records", type=int, default=None, help="最大处理记录数 (测试用)")
+    parser.add_argument("-i", "--input", required=True, help="Input JSONL file path")
+    parser.add_argument("-o", "--output", default="count_vqa_gpt4_enhanced.jsonl", help="Output JSONL file path")
+    parser.add_argument("-t", "--threads", type=int, default=10, help="Number of processing threads")
+    parser.add_argument("-m", "--mode", choices=["missing_gpt4_refinements", "basic"], default="missing_gpt4_refinements", 
+                        help="Processing mode: 'missing_gpt4_refinements' only process records missing GPT-4.1 refinements, 'basic' process all records")
+    parser.add_argument("-k", "--api-key", default=DEFAULT_API_KEY, help="OpenAI API key")
+    parser.add_argument("-c", "--checkpoint", default="./count_vqa_pairs_gpt4_checkpoint.json", help="Checkpoint file path")
+    parser.add_argument("-n", "--max-records", type=int, default=None, help="Maximum number of records to process (for testing)")
     
     args = parser.parse_args()
+    
+    # Validate API key
+    if not args.api_key:
+        print("Error: No API key provided. Please set OPENAI_API_KEY environment variable or use --api-key parameter.")
+        return
     
     # Start processing
     process_dataset(
