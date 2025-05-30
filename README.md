@@ -2,7 +2,7 @@
 
 [![Dataset](https://img.shields.io/badge/Dataset-Download-brightgreen)](https://drive.google.com/file/d/1BUAGaZuMFNwNqHxU-NJ-Hi51Ir-yZFwE/view?usp=sharing)
 [![Annotations](https://img.shields.io/badge/Annotations-Download-blue)](https://drive.google.com/file/d/1zif3Y95Lfb_0zBy9AX_yTFu1kAzW13tA/view?usp=sharing)
-[![Paper](https://img.shields.io/badge/Paper-Coming%20Soon-orange)]() **RSVLM-QA** is a new large-scale, content-rich Visual Question Answering (VQA) dataset specifically designed for the remote sensing (RS) domain. It aims to address limitations in existing RS VQA datasets concerning annotation richness, question diversity, and the assessment of specific reasoning capabilities.
+[![Paper](https://img.shields.io/badge/Paper-Coming%20Soon-orange)]() 
 
 ## Abstract
 
