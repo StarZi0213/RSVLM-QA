@@ -4,7 +4,7 @@
 [![Annotations](https://img.shields.io/badge/Annotations-Download-blue)](https://drive.google.com/file/d/1zif3Y95Lfb_0zBy9AX_yTFu1kAzW13tA/view?usp=sharing)
 [![Paper](https://img.shields.io/badge/Paper-Coming%20Soon-orange)]() 
 
-![RSVLM-QA Dataset Generation Pipeline](asserts/pipeline.png)
+![RSVLM-QA Dataset Generation Pipeline](assets/pipeline.png)
 
 ## Abstract
 
