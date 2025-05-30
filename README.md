@@ -122,12 +122,16 @@ The `models/README.md` covers:
 
 If you use the RSVLM-QA dataset or the code from this repository in your research, please cite our work (details will be updated upon publication):
 
+## Citation
+
+If you use the RSVLM-QA dataset or the code from this repository in your research, please cite our work (details will be updated upon publication):
+
 ```bibtex
 @misc{rsvlmqa2025,
   title={RSVLM-QA: A Benchmark Dataset for Remote Sensing Vision Language Model-based Question Answering},
-  author={StarZi0213 and Colleagues},
+  author={Zi, Xing and Xiao, Jinghao and Shi, Yunxiao and Tao, Xian and Li, Jun and Braytee, Ali and Prasad, Mukesh},
   year={2025},
   publisher={GitHub},
   journal={GitHub repository},
-  howpublished={\url{https://github.com/StarZi0213/RSVLM-QA}}
+  howpublished={\url{[https://github.com/StarZi0213/RSVLM-QA](https://github.com/StarZi0213/RSVLM-QA)}}
 }
