@@ -3,6 +3,7 @@
 [![Dataset](https://img.shields.io/badge/Dataset-Download-brightgreen)](https://drive.google.com/file/d/1BUAGaZuMFNwNqHxU-NJ-Hi51Ir-yZFwE/view?usp=sharing)
 [![Annotations](https://img.shields.io/badge/Annotations-Download-blue)](https://drive.google.com/file/d/1zif3Y95Lfb_0zBy9AX_yTFu1kAzW13tA/view?usp=sharing)
 [![Paper](https://img.shields.io/badge/Paper-Coming%20Soon-orange)]() 
+[![View Detailed Prompts - Prompts.md](https://img.shields.io/badge/View%20Detailed%20Prompts-Prompts.md-blue)](Prompts.md)
 
 ![RSVLM-QA Dataset Generation Pipeline](assets/pipeline.png)
 
