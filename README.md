@@ -108,29 +108,6 @@ The `models/README.md` covers:
 * Performance optimization tips (memory and speed).
 * Details on batch processing and data format specifications.
 
-## General Installation (for Data Generation & Evaluation Scripts)
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/StarZi0213/RSVLM-QA.git
-    cd RSVLM-QA
-    ```
-
-2.  **Create a virtual environment (recommended):**
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-    ```
-
-3.  **Install common dependencies:**
-    The primary scripts (`generate_image_captions.py`, `generate_count_vqa_pairs.py`, `evaluate_vqa_performance.py`) have dependencies like `requests`, `Pillow`, `tqdm`, `backoff`.
-    ```bash
-    pip install requests Pillow tqdm backoff
-    ```
-    *Note: For specific VLM model inference, refer to the installation instructions in `models/README.md`.*
-
-4.  **API Keys:**
-    * The data generation and evaluation scripts require an OpenAI API key for GPT-4.1. You can set it as an environment variable `OPENAI_API_KEY` or pass it via the `--api-key` argument when running the scripts.
 
 ## Usage Workflow Example
 
