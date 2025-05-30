@@ -5,13 +5,22 @@
 [![Paper](https://img.shields.io/badge/Paper-Coming%20Soon-orange)]() 
 [![View Detailed Prompts - Prompts.md](https://img.shields.io/badge/View%20Detailed%20Prompts-Prompts.md-blue)](Prompts.md)
 [![VLM Usage Guide - Model Details](https://img.shields.io/badge/VLM%20Usage%20Guide-Model%20Details-green)](models/README.md)
-
+[![View Dataset Demo - HTML Demo](https://img.shields.io/badge/View%20Dataset%20Demo-HTML%20Demo-orange)](DatasetDemo/RSVLM-QA-Demo.html)
+[![View Prediction Results - HTML Results](https://img.shields.io/badge/View%20Prediction%20Results-HTML%20Results-purple)](DatasetDemo/VQA-PredictionResults.html)
 ![RSVLM-QA Dataset Generation Pipeline](assets/pipeline.png)
 
 ## Abstract
 
 Visual Question Answering (VQA) in remote sensing (RS) is pivotal for interpreting Earth observation data. However, existing RS VQA datasets are constrained by limitations in annotation richness, question diversity, and the assessment of specific reasoning capabilities. This paper introduces Remote Sensing Vision Language Model Question Answering (RSVLM-QA), a new large-scale, content-rich VQA dataset for the RS domain. RSVLM-QA integrates several well-known RS segmentation and detection datasets, namely WHU, LoveDA, INRIA, and iSAID. We employ an innovative dual-track annotation generation pipeline. Firstly, we leverage Large Language Models (LLMs), specifically GPT-4.1, with meticulously designed prompts to automatically generate a suite of detailed annotations including image captions, spatial relations, and semantic tags, alongside complex caption-based VQA pairs. Secondly, to address the challenging task of object counting in RS imagery, we have developed a specialized automated process that extracts object counts directly from the original segmentation data; GPT-4.1 then formulates natural language answers from these counts, which are paired with preset question templates to create counting QA pairs. RSVLM-QA comprises 13,820 images and 162,373 VQA pairs, featuring extensive annotations and diverse question types. We provide a detailed statistical analysis of the dataset and a comparison with existing RS VQA benchmarks, highlighting the superior depth and breadth of RSVLM-QA's annotations. Furthermore, we conduct benchmark experiments on Six mainstream Vision Language Models (VLMs), demonstrating that RSVLM-QA effectively evaluates and challenges the understanding and reasoning abilities of current VLMs in the RS domain. We believe RSVLM-QA will serve as a pivotal resource for the RS VQA and VLM research communities, poised to catalyze advancements in the field. The dataset, generation code, and benchmark models are publicly available at [https://github.com/StarZi0213/RSVLM-QA](https://github.com/StarZi0213/RSVLM-QA).
+## Demos and Results
 
+Explore interactive demonstrations of the dataset and view sample prediction results through the following HTML pages. Ensure you have downloaded the repository or have access to these files locally to view them, or that they are hosted appropriately if intended for web viewing.
+
+* **RSVLM-QA Interactive Demo:**
+    [![View Dataset Demo - HTML Demo](https://img.shields.io/badge/View%20Dataset%20Demo-HTML%20Demo-orange)](DatasetDemo/RSVLM-QA-Demo.html)
+
+* **VQA Prediction Results:**
+    [![View Prediction Results - HTML Results](https://img.shields.io/badge/View%20Prediction%20Results-HTML%20Results-purple)](DatasetDemo/VQA-PredictionResults.html)
 ## Key Features
 
 * **Large-Scale & Content-Rich:** 13,820 images and 162,373 VQA pairs.
