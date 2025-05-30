@@ -4,6 +4,7 @@
 [![Annotations](https://img.shields.io/badge/Annotations-Download-blue)](https://drive.google.com/file/d/1zif3Y95Lfb_0zBy9AX_yTFu1kAzW13tA/view?usp=sharing)
 [![Paper](https://img.shields.io/badge/Paper-Coming%20Soon-orange)]() 
 [![View Detailed Prompts - Prompts.md](https://img.shields.io/badge/View%20Detailed%20Prompts-Prompts.md-blue)](Prompts.md)
+[![VLM Usage Guide - Model Details](https://img.shields.io/badge/VLM%20Usage%20Guide-Model%20Details-green)](models/README.md)
 
 ![RSVLM-QA Dataset Generation Pipeline](assets/pipeline.png)
 
