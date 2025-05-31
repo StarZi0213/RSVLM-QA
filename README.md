@@ -38,8 +38,19 @@ Easy way, just download and drop into your browser.
 
 * **Full Dataset (Images):** [Download from Google Drive](https://drive.google.com/file/d/1BUAGaZuMFNwNqHxU-NJ-Hi51Ir-yZFwE/view?usp=sharing)
 * **Annotation Files (JSONL):** [Download from Google Drive](https://drive.google.com/file/d/1zif3Y95Lfb_0zBy9AX_yTFu1kAzW13tA/view?usp=sharing)
-
   
+## Model Performance Comparison
+
+| Rank | Model       | All Categories | Excl. Caption |
+|------|-------------|----------------|---------------|
+| 🥇   | Ovis2       | 70.2%          | 66.8%         |
+| 🥈   | InternVL3   | 61.7%          | 57.7%         |
+| 🥉   | Qwen2.5-VL  | 58.1%          | 53.2%         |
+| 4    | Gemma3      | 58.0%          | 59.4%         |
+| 5    | LLaVA       | 52.1%          | 50.3%         |
+| 6    | BLIP-2      | 29.0%          | 29.5%         |
+
+
 ### Core Prompts Used in Data Generation and Evaluation
 
 The generation of detailed annotations (tags, relations, VQA pairs, captions) and the subsequent evaluation of model performance heavily rely on carefully engineered prompts provided to Large Language Models (specifically GPT-4.1).
