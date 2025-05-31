@@ -129,8 +129,8 @@ The `models/README.md` covers:
         ```
         
 ## Citation
-
-If you use the RSVLM-QA dataset or the code from this repository in your research, please cite our work (details will be updated upon publication):
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+If you use the RSVLM-QA dataset or the code from this repository in your research, please cite our work:
 
 ```bibtex
 @misc{rsvlmqa2025,
