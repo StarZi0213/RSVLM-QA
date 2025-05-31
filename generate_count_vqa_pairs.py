@@ -18,7 +18,7 @@ from collections import Counter, defaultdict
 # API key from environment variable or default to empty string
 DEFAULT_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 
-# API Rate limits for GPT-4.1-mini
+# API Rate limits for GPT-4.1
 MAX_REQUESTS_PER_MINUTE = 500  # 500 requests per minute
 MAX_TOKENS_PER_MINUTE = 200000  # 200k tokens per minute
 
