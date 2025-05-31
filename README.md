@@ -87,7 +87,10 @@ The RSVLM-QA dataset was created using a sophisticated pipeline involving both a
     * Manages API rate limits, multithreading, checkpointing, and detailed statistics collection.
     * Input: JSONL file with model answers (e.g., from VLM inference scripts).
     * Output: JSONL file with evaluation results (judgment and reason) appended.
-
+4. **VQA Paris Generation (`generate_vqa_pairs.py`)**
+5. **Extract tags (`generate_vqa_pairs.py`)**
+6. **Extract spatial_relations (`extract_spatial_relations.py)**
+   
 ## Model Benchmarking
 
 We have benchmarked several state-of-the-art Vision Language Models (VLMs) on the RSVLM-QA dataset. The inference scripts and usage instructions for these models are provided in the `models/` directory.
