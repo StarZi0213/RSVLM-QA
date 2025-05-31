@@ -38,17 +38,7 @@ Easy way, just download and drop into your browser.
 
 * **Full Dataset (Images):** [Download from Google Drive](https://drive.google.com/file/d/1BUAGaZuMFNwNqHxU-NJ-Hi51Ir-yZFwE/view?usp=sharing)
 * **Annotation Files (JSONL):** [Download from Google Drive](https://drive.google.com/file/d/1zif3Y95Lfb_0zBy9AX_yTFu1kAzW13tA/view?usp=sharing)
-  
-## Model Performance Comparison
 
-| Rank | Model       | All Categories | Excl. Caption |
-|------|-------------|----------------|---------------|
-| 🥇   | Ovis2       | 70.2%          | 66.8%         |
-| 🥈   | InternVL3   | 61.7%          | 57.7%         |
-| 🥉   | Qwen2.5-VL  | 58.1%          | 53.2%         |
-| 4    | Gemma3      | 58.0%          | 59.4%         |
-| 5    | LLaVA       | 52.1%          | 50.3%         |
-| 6    | BLIP-2      | 29.0%          | 29.5%         |
 
 
 ### Core Prompts Used in Data Generation and Evaluation
@@ -66,7 +56,6 @@ The `Prompts.md` file includes the specific templates for:
 * Image Caption, Feature, and Summary Generation (for GPT-4 Vision)
 * Evaluation of Image Captions
 * Evaluation of VQA Tasks (Correct/Wrong judgment)
-
   
 ## Dataset Generation Pipeline
 
@@ -108,19 +97,15 @@ We have benchmarked several state-of-the-art Vision Language Models (VLMs) on th
 
 Please refer to the **[Visual Language Models Usage Guide (models/README.md)](models/README.md)** for detailed setup, configuration, and execution instructions for each of the following models:
 
-* Qwen2.5-VL
-* Gemma 3
-* BLIP2
-* InternVL3
-* LLaVA
-* OVIS2
+| Rank | Model       | All Categories | Excl. Caption |
+|------|-------------|----------------|---------------|
+| 🥇   | Ovis2       | 70.2%          | 66.8%         |
+| 🥈   | InternVL3   | 61.7%          | 57.7%         |
+| 🥉   | Qwen2.5-VL  | 58.1%          | 53.2%         |
+| 4    | Gemma3      | 58.0%          | 59.4%         |
+| 5    | LLaVA       | 52.1%          | 50.3%         |
+| 6    | BLIP-2      | 29.0%          | 29.5%         |
 
-The `models/README.md` covers:
-* Common setup and installation.
-* Model-specific dependencies and configurations.
-* Instructions on how to run inference.
-* Performance optimization tips (memory and speed).
-* Details on batch processing and data format specifications.
 
 
 ## Usage Workflow Example
