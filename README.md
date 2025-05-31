@@ -12,6 +12,13 @@
 ## Abstract
 
 Visual Question Answering (VQA) in remote sensing (RS) is pivotal for interpreting Earth observation data. However, existing RS VQA datasets are constrained by limitations in annotation richness, question diversity, and the assessment of specific reasoning capabilities. This paper introduces Remote Sensing Vision Language Model Question Answering (RSVLM-QA), a new large-scale, content-rich VQA dataset for the RS domain. RSVLM-QA is constructed by integrating data from several prominent RS segmentation and detection datasets: WHU, LoveDA, INRIA, and iSAID. We employ an innovative dual-track annotation generation pipeline. Firstly, we leverage Large Language Models (LLMs), specifically GPT-4.1, with meticulously designed prompts to automatically generate a suite of detailed annotations including image captions, spatial relations, and semantic tags, alongside complex caption-based VQA pairs. Secondly, to address the challenging task of object counting in RS imagery, we have developed a specialized automated process that extracts object counts directly from the original segmentation data; GPT-4.1 then formulates natural language answers from these counts, which are paired with preset question templates to create counting QA pairs. RSVLM-QA comprises 13,820 images and 162,373 VQA pairs, featuring extensive annotations and diverse question types. We provide a detailed statistical analysis of the dataset and a comparison with existing RS VQA benchmarks, highlighting the superior depth and breadth of RSVLM-QA's annotations. Furthermore, we conduct benchmark experiments on Six mainstream Vision Language Models (VLMs), demonstrating that RSVLM-QA effectively evaluates and challenges the understanding and reasoning abilities of current VLMs in the RS domain. We believe RSVLM-QA will serve as a pivotal resource for the RS VQA and VLM research communities, poised to catalyze advancements in the field. The dataset, generation code, and benchmark models are publicly available at https://github.com/StarZi0213/RSVLM-QA or https://rsvlm-qa.vercel.app/.
+
+## Dataset Access
+
+* **Full Dataset (Images):** [Download from Google Drive](https://drive.google.com/file/d/1BUAGaZuMFNwNqHxU-NJ-Hi51Ir-yZFwE/view?usp=sharing)
+* **Annotation Files (JSONL):** [Download from Google Drive](https://drive.google.com/file/d/1zif3Y95Lfb_0zBy9AX_yTFu1kAzW13tA/view?usp=sharing)
+
+
 ## Demos and Results
 
 Explore interactive demonstrations of the dataset and view sample prediction results through the following HTML pages. 
@@ -33,12 +40,6 @@ Easy way, just download and drop into your browser.
 * **Extensive Annotations:** Superior depth and breadth compared to existing RS VQA benchmarks.
 * **Challenging Benchmarks:** Designed to effectively evaluate and push the boundaries of VLMs in the RS domain.
 * **Open Source:** Dataset, generation code, and model benchmarking scripts are publicly available.
-
-## Dataset Access
-
-* **Full Dataset (Images):** [Download from Google Drive](https://drive.google.com/file/d/1BUAGaZuMFNwNqHxU-NJ-Hi51Ir-yZFwE/view?usp=sharing)
-* **Annotation Files (JSONL):** [Download from Google Drive](https://drive.google.com/file/d/1zif3Y95Lfb_0zBy9AX_yTFu1kAzW13tA/view?usp=sharing)
-
 
 
 ### Core Prompts Used in Data Generation and Evaluation
