@@ -1,0 +1,12 @@
+This dataset is released in support of the paper "RSVLM-QA: A Benchmark Dataset for Remote Sensing Vision Language Model-based Question Answering".
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Please cite our paper if you use this dataset:
+@misc{rsvlmqa2025,
+  title={RSVLM-QA: A Benchmark Dataset for Remote Sensing Vision Language Model-based Question Answering},
+  author={Zi, Xing and Xiao, Jinghao and Shi, Yunxiao and Tao, Xian and Li, Jun and Braytee, Ali and Prasad, Mukesh},
+  year={2025},
+  publisher={GitHub},
+  journal={GitHub repository},
+  howpublished={\url{[https://github.com/StarZi0213/RSVLM-QA](https://github.com/StarZi0213/RSVLM-QA)}}
+}
