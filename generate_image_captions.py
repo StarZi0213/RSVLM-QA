@@ -16,7 +16,7 @@ import io
 import tempfile
 
 # API key from environment variable or default to empty string
-DEFAULT_API_KEY = 'sk-proj--0qkqsf9gWqeQhqOQQN3YDECGerqOvMsP6GD4nbdFaQRvFJWgLjl-5mMntZaC34-kZ4HWIMie2WgdhLQ8xC5I8bEV_Ki6xiIvz2dGbcXmxGZyvzQ17dFArpkA'
+DEFAULT_API_KEY = ''
 
 # API Rate limits
 MAX_REQUESTS_PER_MINUTE = 10000  # 10k requests per minute
