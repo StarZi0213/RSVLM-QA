@@ -2,7 +2,7 @@
 [![Dataset Dashboard](https://img.shields.io/badge/Access-Online%20Dashboard-black)](https://rsvlm-qa.vercel.app/)
 [![Dataset](https://img.shields.io/badge/Dataset-Download-brightgreen)](https://drive.google.com/file/d/1BUAGaZuMFNwNqHxU-NJ-Hi51Ir-yZFwE/view?usp=sharing)
 [![Annotations](https://img.shields.io/badge/Annotations-Download-blue)](https://drive.google.com/file/d/1zif3Y95Lfb_0zBy9AX_yTFu1kAzW13tA/view?usp=sharing)
-[![ACM MM'25](https://img.shields.io/badge/ACM%20MM'25-Accepted-brightgreen)](https://your-paper-link.com)
+[![ACM MM'25]([https://img.shields.io/badge/ACM%20MM'25-Accepted-brightgreen)](https://your-paper-link.com](https://dl.acm.org/doi/10.1145/3746027.3758235))
 [![View Detailed Prompts - Prompts.md](https://img.shields.io/badge/View%20Detailed%20Prompts-Prompts.md-blue)](Prompts.md)
 [![VLM Usage Guide - Model Details](https://img.shields.io/badge/VLM%20Usage%20Guide-Model%20Details-green)](models/README.md)
 [![View Dataset Demo - HTML Demo](https://img.shields.io/badge/View%20Dataset%20Demo-HTML%20Demo-orange)](DatasetDemo/RSVLM-QA-Demo.html)
@@ -133,11 +133,18 @@ License: Creative Commons Attribution 4.0 International (CC BY 4.0)
 If you use the RSVLM-QA dataset or the code from this repository in your research, please cite our work:
 
 ```bibtex
-@misc{rsvlmqa2025,
-  title={RSVLM-QA: A Benchmark Dataset for Remote Sensing Vision Language Model-based Question Answering},
-  author={Zi, Xing and Xiao, Jinghao and Shi, Yunxiao and Tao, Xian and Li, Jun and Braytee, Ali and Prasad, Mukesh},
-  year={2025},
-  publisher={GitHub},
-  journal={GitHub repository},
-  howpublished={\url{[https://github.com/StarZi0213/RSVLM-QA](https://github.com/StarZi0213/RSVLM-QA)}}
+@inproceedings{10.1145/3746027.3758235,
+author = {Zi, Xing and Xiao, Jinghao and Shi, Yunxiao and Tao, Xian and Li, Jun and Braytee, Ali and Prasad, Mukesh},
+title = {RSVLM-QA: A Benchmark Dataset for Remote Sensing Vision Language Model-based Question Answering},
+year = {2025},
+isbn = {9798400720352},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3746027.3758235},
+doi = {10.1145/3746027.3758235},
+pages = {12905–12911},
+numpages = {7},
+keywords = {automated annotation, dual-track vqa generation, large-scale dataset, remote sensing visual question answering (rsvqa), vision language models (vlms)},
+location = {Dublin, Ireland},
+series = {MM '25}
 }
