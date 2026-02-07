@@ -2,7 +2,7 @@
 [![Dataset Dashboard](https://img.shields.io/badge/Access-Online%20Dashboard-black)](https://rsvlm-qa.vercel.app/)
 [![Dataset](https://img.shields.io/badge/Dataset-Download-brightgreen)](https://drive.google.com/file/d/1BUAGaZuMFNwNqHxU-NJ-Hi51Ir-yZFwE/view?usp=sharing)
 [![Annotations](https://img.shields.io/badge/Annotations-Download-blue)](https://drive.google.com/file/d/1zif3Y95Lfb_0zBy9AX_yTFu1kAzW13tA/view?usp=sharing)
-[![ACM MM'25]([https://img.shields.io/badge/ACM%20MM'25-Accepted-brightgreen)](https://your-paper-link.com](https://dl.acm.org/doi/10.1145/3746027.3758235))
+[![ACM MM'25](https://img.shields.io/badge/ACM%20MM'25-Accepted-brightgreen)](https://dl.acm.org/doi/10.1145/3746027.3758235)
 [![View Detailed Prompts - Prompts.md](https://img.shields.io/badge/View%20Detailed%20Prompts-Prompts.md-blue)](Prompts.md)
 [![VLM Usage Guide - Model Details](https://img.shields.io/badge/VLM%20Usage%20Guide-Model%20Details-green)](models/README.md)
 [![View Dataset Demo - HTML Demo](https://img.shields.io/badge/View%20Dataset%20Demo-HTML%20Demo-orange)](DatasetDemo/RSVLM-QA-Demo.html)
